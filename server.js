@@ -11,11 +11,10 @@ const PORT = process.env.PORT || 5000;
 const API_USERNAME = process.env.API_USERNAME;
 const API_PASSWORD = process.env.API_PASSWORD;
 
-// Global session bilgileri
+// Global ses.
 let sessionId = null;
-let sessionExpiry = null; // timestamp
+let sessionExpiry = null;
 
-// Login fonksiyonu
 async function login() {
   try {
     const res = await axios.get(
@@ -37,10 +36,9 @@ async function login() {
   }
 }
 
-// Partner verisini çek
+// Partner veris
 async function fetchPartners() {
   try {
-    // Session yoksa veya süresi dolmuşsa login yap
     if (!sessionId || Date.now() > sessionExpiry) {
       await login();
     }
@@ -57,13 +55,13 @@ async function fetchPartners() {
     if (err.response?.status === 401) {
       console.warn("⚠️ 401 hatası: Session süresi bitmiş. Yeniden login olunuyor...");
       await login();
-      return fetchPartners(); // Tekrar dene
+      return fetchPartners();
     }
     throw err;
   }
 }
 
-// Tüm partnerler endpoint
+// Partnerler endpoint
 app.get("/api/partners", async (req, res) => {
   try {
     const data = await fetchPartners();
@@ -82,21 +80,19 @@ app.get("/api/partners", async (req, res) => {
   }
 });
 
-// Tek partner detayı endpoint
+// Partner detay endpoint
 app.get("/api/partners/:id", async (req, res) => {
   try {
     const data = await fetchPartners();
     const rows = data.Rows || [];
 
     const partner = rows.find(row => {
-      // objectid kolonunu al
       const idCell = row.Cells.find(c => c.ColumnName === "vw_esit_isyeri.objectid");
       return idCell && Number(idCell.Value) === Number(req.params.id);
     });
 
     if (!partner) return res.status(404).json({ message: "Partner bulunamadı" });
 
-    // Cells'i obje haline çevir
     const partnerObj = {};
     partner.Cells.forEach(c => {
       const key = c.ColumnName.replace("vw_esit_isyeri.", "");
@@ -113,7 +109,6 @@ app.get("/api/partners/:id", async (req, res) => {
 
 
 
-// Server başlat
 app.listen(PORT, () => {
   console.log(`✅ Server http://localhost:${PORT} üzerinde çalışıyor`);
 });
