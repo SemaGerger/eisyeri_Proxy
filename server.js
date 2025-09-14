@@ -36,7 +36,7 @@ async function login() {
   }
 }
 
-// Partner veris
+// Partner veri
 async function fetchPartners() {
   try {
     if (!sessionId || Date.now() > sessionExpiry) {
