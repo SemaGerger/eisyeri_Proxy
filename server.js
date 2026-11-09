@@ -7,11 +7,11 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 
-const PORT = process.env.PORT || 5050 ;
+const PORT = process.env.PORT || 5050;
 const API_USERNAME = process.env.API_USERNAME;
 const API_PASSWORD = process.env.API_PASSWORD;
 
-// Global ses.
+// Global session
 let sessionId = null;
 let sessionExpiry = null;
 
@@ -61,6 +61,15 @@ async function fetchPartners() {
   }
 }
 
+// Sağlık kontrolü (Health Check) endpoint'i - Hem /health hem /api/health destekler
+app.get(["/health", "/api/health"], (req, res) => {
+  res.status(200).json({
+    status: "UP",
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()),
+  });
+});
+
 // Partnerler endpoint
 app.get("/api/partners", async (req, res) => {
   try {
@@ -105,9 +114,6 @@ app.get("/api/partners/:id", async (req, res) => {
     res.status(500).json({ error: "Partner detayı alınamadı" });
   }
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`✅ Server http://localhost:${PORT} üzerinde çalışıyor`);
